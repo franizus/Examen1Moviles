@@ -48,6 +48,24 @@ class DBAutorHandlerAplicacion(context: Context) : SQLiteOpenHelper(context, Dat
         dbWriteable.close()
     }
 
+    fun updateAutor(autor: Autor) {
+        val dbWriteable = writableDatabase
+        val cv = ContentValues()
+
+        cv.put(DataBaseAutor.CAMPO_NOMBRE, autor.nombre)
+        cv.put(DataBaseAutor.CAMPO_APELLIDO, autor.apellido)
+        cv.put(DataBaseAutor.CAMPO_FECHANACIMIENTO, autor.fechaNacimiento)
+        cv.put(DataBaseAutor.CAMPO_NUMEROLIBROS, autor.numeroLibros)
+        cv.put(DataBaseAutor.CAMPO_ECUATORIANO, autor.ecuatoriano)
+
+        val whereClause = "${DataBaseAutor.CAMPO_ID} = ${autor.id}"
+        val resultado = dbWriteable.update(DataBaseAutor.TABLE_NAME, cv, whereClause, null)
+
+        Log.i("database", "Si es -1 hubo error, sino exito: Respuesta: $resultado")
+
+        dbWriteable.close()
+    }
+
     fun deleteAutor(id: Int): Boolean {
         val dbWriteable = writableDatabase
         val whereClause = "${DataBaseAutor.CAMPO_ID} = $id"

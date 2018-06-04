@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
     fun irACreateView() {
         val intent = Intent(this, CreateActivity::class.java)
+        intent.putExtra("tipo", "Create")
         startActivity(intent)
     }
 }

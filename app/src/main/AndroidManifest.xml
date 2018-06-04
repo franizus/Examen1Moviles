@@ -20,8 +20,7 @@
         <activity android:name=".ListActivity" />
         <activity android:name=".CreateActivity" />
         <activity android:name=".CreateBookActivity" />
-        <activity android:name=".EditActivity" />
-        <activity android:name=".EditBookActivity"></activity>
+        <activity android:name=".DetailsBookActivity"></activity>
     </application>
 
 </manifest>

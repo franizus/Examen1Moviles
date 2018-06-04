@@ -27,7 +27,7 @@
         android:layout_marginBottom="60dp"
         android:layout_marginLeft="72dp"
         android:layout_marginStart="72dp"
-        android:text="@string/create_btn"
+        android:text="@string/create"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

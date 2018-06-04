@@ -8,7 +8,7 @@ import android.util.Log
 
 class DataBaseLibro {
     companion object {
-        val DB_NAME = "autorLibro"
+        val DB_NAME = "Libros"
         val TABLE_NAME = "libro"
         val CAMPO_ICBN = "icbn"
         val CAMPO_NOMBRE = "nombre"
@@ -51,7 +51,33 @@ class DBLibroHandlerAplicacion(context: Context) : SQLiteOpenHelper(context, Dat
         dbWriteable.close()
     }
 
-    fun getLibrosList(): ArrayList<Libro> {
+    fun updateLibro(libro: Libro) {
+        val dbWriteable = writableDatabase
+        val cv = ContentValues()
+
+        cv.put(DataBaseLibro.CAMPO_ICBN, libro.icbn)
+        cv.put(DataBaseLibro.CAMPO_NOMBRE, libro.nombre)
+        cv.put(DataBaseLibro.CAMPO_NUMEROPAGINAS, libro.numeroPaginas)
+        cv.put(DataBaseLibro.CAMPO_EDICION, libro.edicion)
+        cv.put(DataBaseLibro.CAMPO_FECHAPUBLICACION, libro.fechaPublicacion)
+        cv.put(DataBaseLibro.CAMPO_NOMBREEDITORIAL, libro.nombreEditorial)
+        cv.put(DataBaseLibro.CAMPO_AUTORID, libro.autorID)
+
+        val whereClause = "${DataBaseLibro.CAMPO_ICBN} = ${libro.icbn}"
+        val resultado = dbWriteable.update(DataBaseLibro.TABLE_NAME, cv, whereClause, null)
+
+        Log.i("database", "Si es -1 hubo error, sino exito: Respuesta: $resultado")
+
+        dbWriteable.close()
+    }
+
+    fun deleteLibro(icbn: Int): Boolean {
+        val dbWriteable = writableDatabase
+        val whereClause = "${DataBaseLibro.CAMPO_ICBN} = $icbn"
+        return dbWriteable.delete(DataBaseLibro.TABLE_NAME, whereClause, null) > 0
+    }
+
+    fun getLibrosList(idAutor: Int): ArrayList<Libro> {
         var lista = ArrayList<Libro>()
         val dbReadable = readableDatabase
         val query = "SELECT * FROM ${DataBaseLibro.TABLE_NAME}"

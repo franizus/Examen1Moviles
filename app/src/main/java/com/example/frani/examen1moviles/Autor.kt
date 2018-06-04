@@ -1,6 +1,5 @@
 package com.example.frani.examen1moviles
 
-import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 
@@ -36,13 +35,6 @@ class Autor(var id: Int, var nombre: String, var apellido: String, var fechaNaci
         override fun newArray(size: Int): Array<Autor?> {
             return arrayOfNulls(size)
         }
-    }
-
-    fun getBooks(context: Context): ArrayList<Libro> {
-        var lista = ArrayList<Libro>()
-        val dbHandler = DBLibroHandlerAplicacion(context)
-        lista = dbHandler.getLibrosList()
-        return lista
     }
 
 }
