@@ -39,12 +39,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
+        val zoom = 17f
         // Add a marker in Sydney and move the camera
         libros.forEach{ libro: Libro ->
             val temp = LatLng(libro.latitud, libro.longitud)
             mMap.addMarker(MarkerOptions().position(temp).title(libro.nombre))
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(temp))
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(temp, zoom))
         }
 
     }
