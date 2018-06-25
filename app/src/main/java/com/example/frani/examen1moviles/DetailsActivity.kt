@@ -16,7 +16,6 @@ class DetailsActivity : AppCompatActivity() {
     var autor: Autor? = null
     lateinit var adaptador: LibroAdapter
     lateinit var libros: ArrayList<Libro>
-    lateinit var dbHandler: DBLibroHandlerAplicacion
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,8 +29,7 @@ class DetailsActivity : AppCompatActivity() {
         txtShowNumLibAutor.text = autor?.numeroLibros.toString()
         txtShowEcuAutor.text = if(autor?.ecuatoriano == 1) getString(R.string.yes) else getString(R.string.no)
 
-        dbHandler = DBLibroHandlerAplicacion(this)
-        libros = dbHandler.getLibrosList(autor?.id!!)
+        libros = DataBaseLibro.getLibrosList(autor?.id!!)
 
         val layoutManager = LinearLayoutManager(this)
         adaptador = LibroAdapter(libros)
@@ -45,11 +43,21 @@ class DetailsActivity : AppCompatActivity() {
         btnNuevoLibro.setOnClickListener{
             v: View? ->  crearLibro()
         }
+
+        btnMapa.setOnClickListener { view: View ->
+            irAActividadGoogleMaps()
+        }
     }
 
     fun crearLibro() {
         val intent = Intent(this, CreateBookActivity::class.java)
         intent.putExtra("tipo", "Create")
+        intent.putExtra("idAutor", autor?.id!!)
+        startActivity(intent)
+    }
+
+    fun irAActividadGoogleMaps() {
+        val intent = Intent(this, MapsActivity::class.java)
         intent.putExtra("idAutor", autor?.id!!)
         startActivity(intent)
     }
@@ -63,7 +71,7 @@ class DetailsActivity : AppCompatActivity() {
                 val intent = Intent(Intent.ACTION_SEND)
                 intent.type = "text/html"
                 intent.putExtra(Intent.EXTRA_SUBJECT, "${getString(R.string.libro)} - ${getString(R.string.app_name)}")
-                intent.putExtra(Intent.EXTRA_TEXT, "${getString(R.string.isbn)} ${libro.icbn}\n${getString(R.string.name)} ${libro.nombre}\n${getString(R.string.edicion)} ${libro.edicion}\n${getString(R.string.editorial)} ${libro.nombreEditorial}")
+                intent.putExtra(Intent.EXTRA_TEXT, "${getString(R.string.isbn)} ${libro.isbn}\n${getString(R.string.name)} ${libro.nombre}\n${getString(R.string.edicion)} ${libro.edicion}\n${getString(R.string.editorial)} ${libro.nombreEditorial}")
                 startActivity(intent)
                 return true
             }
@@ -78,7 +86,7 @@ class DetailsActivity : AppCompatActivity() {
                 val builder = AlertDialog.Builder(this)
                 builder.setMessage(R.string.confirmation)
                         .setPositiveButton(R.string.yes, { dialog, which ->
-                            dbHandler.deleteLibro(libro.icbn)
+                            DataBaseLibro.deleteLibro(libro.id)
                             finish()
                             startActivity(intent)
                         }

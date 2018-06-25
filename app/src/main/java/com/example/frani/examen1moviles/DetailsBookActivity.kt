@@ -14,7 +14,7 @@ class DetailsBookActivity : AppCompatActivity() {
 
         libro = intent.getParcelableExtra("libro")
 
-        txtShowIsbn.text = libro?.icbn.toString()
+        txtShowIsbn.text = libro?.isbn
         txtShowNombreLibro.text = libro?.nombre
         txtShowNumPagLibro.text = libro?.numeroPaginas.toString()
         txtShowEdicLibro.text = libro?.edicion.toString()

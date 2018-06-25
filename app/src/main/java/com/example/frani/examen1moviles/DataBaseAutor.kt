@@ -1,100 +1,61 @@
 package com.example.frani.examen1moviles
 
-import android.content.ContentValues
-import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import java.io.StringReader
+import android.os.StrictMode
+import com.beust.klaxon.*
+import com.github.kittinunf.fuel.*
+
 
 class DataBaseAutor {
+
     companion object {
-        val DB_NAME = "autorLibro"
-        val TABLE_NAME = "autors"
-        val CAMPO_ID = "id"
-        val CAMPO_NOMBRE = "nombre"
-        val CAMPO_APELLIDO = "apellido"
-        val CAMPO_FECHANACIMIENTO = "fechaNacimiento"
-        val CAMPO_NUMEROLIBROS = "numeroLibros"
-        val CAMPO_ECUATORIANO = "ecuatoriano"
-    }
-}
 
-class DBAutorHandlerAplicacion(context: Context) : SQLiteOpenHelper(context, DataBaseAutor.DB_NAME, null, 1) {
-
-    override fun onCreate(db: SQLiteDatabase?) {
-
-        val createTableSQL = "CREATE TABLE ${DataBaseAutor.TABLE_NAME} (${DataBaseAutor.CAMPO_ID} INTEGER PRIMARY KEY AUTOINCREMENT, ${DataBaseAutor.CAMPO_NOMBRE} VARCHAR(50),${DataBaseAutor.CAMPO_APELLIDO} VARCHAR(50),${DataBaseAutor.CAMPO_FECHANACIMIENTO} VARCHAR(20), ${DataBaseAutor.CAMPO_NUMEROLIBROS} INTEGER, ${DataBaseAutor.CAMPO_ECUATORIANO} INTEGER)"
-        db?.execSQL(createTableSQL)
-    }
-
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    fun insertarAutor(autor: Autor) {
-        val dbWriteable = writableDatabase
-        val cv = ContentValues()
-
-        cv.put(DataBaseAutor.CAMPO_NOMBRE, autor.nombre)
-        cv.put(DataBaseAutor.CAMPO_APELLIDO, autor.apellido)
-        cv.put(DataBaseAutor.CAMPO_FECHANACIMIENTO, autor.fechaNacimiento)
-        cv.put(DataBaseAutor.CAMPO_NUMEROLIBROS, autor.numeroLibros)
-        cv.put(DataBaseAutor.CAMPO_ECUATORIANO, autor.ecuatoriano)
-
-        val resultado = dbWriteable.insert(DataBaseAutor.TABLE_NAME, null, cv)
-
-        Log.i("database", "Si es -1 hubo error, sino exito: Respuesta: $resultado")
-
-        dbWriteable.close()
-    }
-
-    fun updateAutor(autor: Autor) {
-        val dbWriteable = writableDatabase
-        val cv = ContentValues()
-
-        cv.put(DataBaseAutor.CAMPO_NOMBRE, autor.nombre)
-        cv.put(DataBaseAutor.CAMPO_APELLIDO, autor.apellido)
-        cv.put(DataBaseAutor.CAMPO_FECHANACIMIENTO, autor.fechaNacimiento)
-        cv.put(DataBaseAutor.CAMPO_NUMEROLIBROS, autor.numeroLibros)
-        cv.put(DataBaseAutor.CAMPO_ECUATORIANO, autor.ecuatoriano)
-
-        val whereClause = "${DataBaseAutor.CAMPO_ID} = ${autor.id}"
-        val resultado = dbWriteable.update(DataBaseAutor.TABLE_NAME, cv, whereClause, null)
-
-        Log.i("database", "Si es -1 hubo error, sino exito: Respuesta: $resultado")
-
-        dbWriteable.close()
-    }
-
-    fun deleteAutor(id: Int): Boolean {
-        val dbWriteable = writableDatabase
-        val whereClause = "${DataBaseAutor.CAMPO_ID} = $id"
-        return dbWriteable.delete(DataBaseAutor.TABLE_NAME, whereClause, null) > 0
-    }
-
-    fun getAutorsList(): ArrayList<Autor> {
-        var lista = ArrayList<Autor>()
-        val dbReadable = readableDatabase
-        val query = "SELECT * FROM ${DataBaseAutor.TABLE_NAME}"
-        val resultado = dbReadable.rawQuery(query, null)
-
-        if (resultado.moveToFirst()) {
-            do {
-                val id = resultado.getString(0).toInt()
-                val nombre = resultado.getString(1)
-                val apellido = resultado.getString(2)
-                val fechaNacimiento = resultado.getString(3)
-                val numeroLibros = resultado.getString(4).toInt()
-                val ecuatoriano = resultado.getString(5).toInt()
-
-                lista.add(Autor(id, nombre, apellido, fechaNacimiento, numeroLibros, ecuatoriano))
-            } while (resultado.moveToNext())
+        fun insertarAutor(autor: Autor) {
+            "http://192.168.100.159:1337/Autor".httpPost(listOf("nombre" to autor.nombre, "apellido" to autor.apellido, "fechaNacimiento" to autor.fechaNacimiento, "numeroLibros" to autor.numeroLibros, "ecuatoriano" to autor.ecuatoriano))
+                    .responseString { request, _, result ->
+                        Log.d("http-ejemplo", request.toString())
+                    }
         }
 
-        resultado.close()
-        dbReadable.close()
+        fun updateAutor(autor: Autor) {
+            "http://192.168.100.159:1337/Autor/${autor.id}".httpPatch(listOf("nombre" to autor.nombre, "apellido" to autor.apellido, "fechaNacimiento" to autor.fechaNacimiento, "numeroLibros" to autor.numeroLibros, "ecuatoriano" to autor.ecuatoriano))
+                    .responseString { request, _, result ->
+                        Log.d("http-ejemplo", request.toString())
+                    }
+        }
 
-        return lista
+        fun deleteAutor(id: Int) {
+            "http://192.168.100.159:1337/Autor/$id".httpDelete()
+                    .responseString { request, response, result ->
+                        Log.d("http-ejemplo", request.toString())
+                    }
+        }
+
+        fun getList(): ArrayList<Autor> {
+            val autores: ArrayList<Autor> = ArrayList()
+            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+            StrictMode.setThreadPolicy(policy)
+            val (request, response, result) = "http://192.168.100.159:1337/Autor".httpGet().responseString()
+            val jsonStringAutor = result.get()
+
+            val parser = Parser()
+            val stringBuilder = StringBuilder(jsonStringAutor)
+            val array = parser.parse(stringBuilder) as JsonArray<JsonObject>
+
+            array.forEach {
+                val id = it["id"] as Int
+                val nombre = it["nombre"] as String
+                val apellido = it["apellido"] as String
+                val fechaNacimiento = it["fechaNacimiento"] as String
+                val numeroLibros = it["numeroLibros"] as Int
+                val ecuatoriano = it["ecuatoriano"] as Int
+                val autor = Autor(id, nombre, apellido, fechaNacimiento, numeroLibros, ecuatoriano, 0, 0)
+                autores.add(autor)
+            }
+            return autores
+        }
+
     }
 
 }

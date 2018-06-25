@@ -29,5 +29,9 @@
     <string name="editorial">Editorial:</string>
     <string name="yes">Si</string>
     <string name="no">No</string>
+    <string name="maps">Mapa</string>
+    <string name="latitud">Latitud</string>
+    <string name="longitud">Longitud</string>
     <string name="confirmation">Seguro desea eliminar?</string>
+    <string name="title_activity_maps">Mapa</string>
 </resources>

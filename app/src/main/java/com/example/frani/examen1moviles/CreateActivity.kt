@@ -9,7 +9,6 @@ import kotlinx.android.synthetic.main.activity_create.*
 
 class CreateActivity : AppCompatActivity() {
 
-    lateinit var dbHandler: DBAutorHandlerAplicacion
     var autor: Autor? = null
     var tipo = false
 
@@ -25,8 +24,6 @@ class CreateActivity : AppCompatActivity() {
             fillFields()
             tipo = true
         }
-
-        dbHandler = DBAutorHandlerAplicacion(this)
 
         btnCrearAutor.setOnClickListener{
             v: View? -> crearAutor()
@@ -51,11 +48,11 @@ class CreateActivity : AppCompatActivity() {
         var ecutoriano = if (switchEcAutor.isChecked) 1 else 0
 
         if (!tipo) {
-            var autor = Autor(0, nombre, apellido, fecha, numeroLibros, ecutoriano)
-            dbHandler.insertarAutor(autor)
+            var autor = Autor(0, nombre, apellido, fecha, numeroLibros, ecutoriano, 0, 0)
+            DataBaseAutor.insertarAutor(autor)
         } else {
-            var autor = Autor(autor?.id!!, nombre, apellido, fecha, numeroLibros, ecutoriano)
-            dbHandler.updateAutor(autor)
+            var autor = Autor(autor?.id!!, nombre, apellido, fecha, numeroLibros, ecutoriano, 0, 0)
+            DataBaseAutor.updateAutor(autor)
         }
 
         irAListView()

@@ -14,14 +14,12 @@ class ListActivity : AppCompatActivity() {
 
     lateinit var adaptador: AutorAdapter
     lateinit var autores: ArrayList<Autor>
-    lateinit var dbHandler: DBAutorHandlerAplicacion
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_list)
 
-        dbHandler = DBAutorHandlerAplicacion(this)
-        autores = dbHandler.getAutorsList()
+        autores = DataBaseAutor.getList()
 
         val layoutManager = LinearLayoutManager(this)
         adaptador = AutorAdapter(autores)
@@ -57,7 +55,7 @@ class ListActivity : AppCompatActivity() {
                 val builder = AlertDialog.Builder(this)
                 builder.setMessage(R.string.confirmation)
                         .setPositiveButton(R.string.yes, { dialog, which ->
-                            dbHandler.deleteAutor(autor.id)
+                            DataBaseAutor.deleteAutor(autor.id)
                             finish()
                             startActivity(intent)
                         }

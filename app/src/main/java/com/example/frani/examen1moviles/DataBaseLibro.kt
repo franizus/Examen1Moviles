@@ -1,106 +1,64 @@
 package com.example.frani.examen1moviles
 
-import android.content.ContentValues
-import android.content.Context
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteOpenHelper
+import android.os.StrictMode
 import android.util.Log
+import com.beust.klaxon.*
+import com.github.kittinunf.fuel.httpDelete
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPatch
+import com.github.kittinunf.fuel.httpPost
+import java.io.StringReader
 
 class DataBaseLibro {
+
     companion object {
-        val DB_NAME = "Libros"
-        val TABLE_NAME = "libro"
-        val CAMPO_ICBN = "icbn"
-        val CAMPO_NOMBRE = "nombre"
-        val CAMPO_NUMEROPAGINAS = "numeroPaginas"
-        val CAMPO_EDICION = "edicion"
-        val CAMPO_FECHAPUBLICACION = "fechaPublicacion"
-        val CAMPO_NOMBREEDITORIAL = "nombreEditorial"
-        val CAMPO_AUTORID = "autorID"
-    }
-}
-
-class DBLibroHandlerAplicacion(context: Context) : SQLiteOpenHelper(context, DataBaseLibro.DB_NAME, null, 1) {
-
-    override fun onCreate(db: SQLiteDatabase?) {
-
-        val createTableSQL = "CREATE TABLE ${DataBaseLibro.TABLE_NAME} (${DataBaseLibro.CAMPO_ICBN} INTEGER PRIMARY KEY, ${DataBaseLibro.CAMPO_NOMBRE} VARCHAR(50),${DataBaseLibro.CAMPO_NUMEROPAGINAS} INTEGER,${DataBaseLibro.CAMPO_EDICION} INTEGER, ${DataBaseLibro.CAMPO_FECHAPUBLICACION} VARCHAR(20), ${DataBaseLibro.CAMPO_NOMBREEDITORIAL} VARCHAR(20),  ${DataBaseLibro.CAMPO_AUTORID} INTEGER)"
-        db?.execSQL(createTableSQL)
-    }
-
-    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    fun insertarLibro(libro: Libro) {
-        val dbWriteable = writableDatabase
-        val cv = ContentValues()
-
-        cv.put(DataBaseLibro.CAMPO_ICBN, libro.icbn)
-        cv.put(DataBaseLibro.CAMPO_NOMBRE, libro.nombre)
-        cv.put(DataBaseLibro.CAMPO_NUMEROPAGINAS, libro.numeroPaginas)
-        cv.put(DataBaseLibro.CAMPO_EDICION, libro.edicion)
-        cv.put(DataBaseLibro.CAMPO_FECHAPUBLICACION, libro.fechaPublicacion)
-        cv.put(DataBaseLibro.CAMPO_NOMBREEDITORIAL, libro.nombreEditorial)
-        cv.put(DataBaseLibro.CAMPO_AUTORID, libro.autorID)
-
-        val resultado = dbWriteable.insert(DataBaseLibro.TABLE_NAME, null, cv)
-
-        Log.i("database", "Si es -1 hubo error, sino exito: Respuesta: $resultado")
-
-        dbWriteable.close()
-    }
-
-    fun updateLibro(libro: Libro) {
-        val dbWriteable = writableDatabase
-        val cv = ContentValues()
-
-        cv.put(DataBaseLibro.CAMPO_ICBN, libro.icbn)
-        cv.put(DataBaseLibro.CAMPO_NOMBRE, libro.nombre)
-        cv.put(DataBaseLibro.CAMPO_NUMEROPAGINAS, libro.numeroPaginas)
-        cv.put(DataBaseLibro.CAMPO_EDICION, libro.edicion)
-        cv.put(DataBaseLibro.CAMPO_FECHAPUBLICACION, libro.fechaPublicacion)
-        cv.put(DataBaseLibro.CAMPO_NOMBREEDITORIAL, libro.nombreEditorial)
-        cv.put(DataBaseLibro.CAMPO_AUTORID, libro.autorID)
-
-        val whereClause = "${DataBaseLibro.CAMPO_ICBN} = ${libro.icbn}"
-        val resultado = dbWriteable.update(DataBaseLibro.TABLE_NAME, cv, whereClause, null)
-
-        Log.i("database", "Si es -1 hubo error, sino exito: Respuesta: $resultado")
-
-        dbWriteable.close()
-    }
-
-    fun deleteLibro(icbn: Int): Boolean {
-        val dbWriteable = writableDatabase
-        val whereClause = "${DataBaseLibro.CAMPO_ICBN} = $icbn"
-        return dbWriteable.delete(DataBaseLibro.TABLE_NAME, whereClause, null) > 0
-    }
-
-    fun getLibrosList(idAutor: Int): ArrayList<Libro> {
-        var lista = ArrayList<Libro>()
-        val dbReadable = readableDatabase
-        val query = "SELECT * FROM ${DataBaseLibro.TABLE_NAME}"
-        val resultado = dbReadable.rawQuery(query, null)
-
-        if (resultado.moveToFirst()) {
-            do {
-                val icbn = resultado.getString(0).toInt()
-                val nombre = resultado.getString(1)
-                val numeroPaginas = resultado.getString(2).toInt()
-                val edicion = resultado.getString(3).toInt()
-                val fechaPublicacion = resultado.getString(4)
-                val nombreEditorial = resultado.getString(5)
-                val autorID = resultado.getString(6).toInt()
-
-                lista.add(Libro(icbn, nombre, numeroPaginas, edicion, fechaPublicacion, nombreEditorial, autorID))
-            } while (resultado.moveToNext())
+        fun insertarLibro(libro: Libro) {
+            "http://192.168.100.159:1337/Libro".httpPost(listOf("isbn" to libro.isbn, "nombre" to libro.nombre, "numeroPaginas" to libro.numeroPaginas, "edicion" to libro.edicion, "fechaPublicacion" to libro.fechaPublicacion, "nombreEditorial" to libro.nombreEditorial, "latitud" to libro.latitud, "longitud" to libro.longitud, "autorId" to libro.autorID))
+                    .responseString { request, _, result ->
+                        Log.d("http-ejemplo", request.toString())
+                    }
         }
 
-        resultado.close()
-        dbReadable.close()
+        fun updateLibro(libro: Libro) {
+            "http://192.168.100.159:1337/Libro/${libro.id}".httpPatch(listOf("isbn" to libro.isbn, "nombre" to libro.nombre, "numeroPaginas" to libro.numeroPaginas, "edicion" to libro.edicion, "fechaPublicacion" to libro.fechaPublicacion, "nombreEditorial" to libro.nombreEditorial, "latitud" to libro.latitud, "longitud" to libro.longitud, "autorId" to libro.autorID))
+                    .responseString { request, _, result ->
+                        Log.d("http-ejemplo", request.toString())
+                    }
+        }
 
-        return lista
+        fun deleteLibro(id: Int) {
+            "http://192.168.100.159:1337/Libro/$id".httpDelete()
+                    .responseString { request, response, result ->
+                        Log.d("http-ejemplo", request.toString())
+                    }
+        }
+
+        fun getLibrosList(idAutor: Int): ArrayList<Libro> {
+            val libros: ArrayList<Libro> = ArrayList()
+            val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
+            StrictMode.setThreadPolicy(policy)
+            val (request, response, result) = "http://192.168.100.159:1337/Libro?autorId=$idAutor".httpGet().responseString()
+            val jsonStringLibro = result.get()
+
+            val parser = Parser()
+            val stringBuilder = StringBuilder(jsonStringLibro)
+            val array = parser.parse(stringBuilder) as JsonArray<JsonObject>
+
+            array.forEach {
+                val id = it["id"] as Int
+                val isbn = it["isbn"] as String
+                val nombre = it["nombre"] as String
+                val numeroPaginas = it["numeroPaginas"] as Int
+                val edicion = it["edicion"] as Int
+                val fechaPublicacion = it["fechaPublicacion"] as String
+                val nombreEditorial = it["nombreEditorial"] as String
+                val latitud = it["latitud"] as Double
+                val longitud = it["longitud"] as Double
+                val libro = Libro(id, isbn, nombre, numeroPaginas, edicion, fechaPublicacion, nombreEditorial, latitud, longitud, idAutor, 0, 0)
+                libros.add(libro)
+            }
+            return libros
+        }
     }
 
 }
